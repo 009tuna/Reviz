@@ -55,11 +55,11 @@ class IPhone141 extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 155),
-                    SizedBox(
+                    const SizedBox(
                       width: 312,
                       child: Column(
                         children: [
-                          const Text(
+                          Text(
                             'İki Teker Dünyasında Bir Standart !',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -70,10 +70,10 @@ class IPhone141 extends StatelessWidget {
                               color: darkgreen,
                             ),
                           ),
-                          const SizedBox(height: 43),
+                          SizedBox(height: 43),
                           Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
+                            children: [
                               SizedBox(
                                 width: width183,
                                 height: 18.3,

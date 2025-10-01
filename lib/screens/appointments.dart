@@ -511,8 +511,8 @@ class _AppointmentCardState extends State<_AppointmentCard> {
                               child: ElevatedButton(
                                 onPressed: widget.onCancel,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFFFEBEE),
-                                  foregroundColor: Color(0xFFD32F2F),
+                                  backgroundColor: const Color(0xFFFFEBEE),
+                                  foregroundColor: const Color(0xFFD32F2F),
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 12),
                                   shape: RoundedRectangleBorder(
@@ -642,9 +642,9 @@ class _EmptyState extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
         const SizedBox(height: 120),
-        Center(
+        const Center(
           child: Column(
-            children: const [
+            children: [
               SizedBox(height: 12),
               Text(
                 'Henüz randevun yok',

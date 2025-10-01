@@ -52,10 +52,10 @@ class _IPhone142State extends State<IPhone142> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Logo
-              SizedBox(
+              const SizedBox(
                 height: 180,
                 child: Column(
-                  children: const [
+                  children: [
                     SizedBox(height: 8),
                     SizedBox(
                       width: 150,
@@ -116,8 +116,9 @@ class _IPhone142State extends State<IPhone142> {
                       decoration:
                           const InputDecoration(hintText: 'ornek@gmail.com'),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty)
+                        if (v == null || v.trim().isEmpty) {
                           return 'Email zorunlu';
+                        }
                         if (!v.contains('@')) return 'Geçerli bir email girin';
                         return null;
                       },

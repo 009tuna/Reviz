@@ -32,7 +32,7 @@ class Menu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userName = "Burak Akpınar"; // TODO: Supabase’den çekilecek
+    const userName = "Burak Akpınar"; // TODO: Supabase’den çekilecek
 
     return SafeArea(
       child: Scaffold(

@@ -38,7 +38,7 @@ class _IPhone143State extends State<IPhone143> {
       );
 
       if (res.user == null) {
-        throw AuthException('Kayıt tamamlanamadı');
+        throw const AuthException('Kayıt tamamlanamadı');
       }
 
       // profiles tablosuna first_login=true upsert (tabloyu önceden oluşturduğunu varsayıyoruz)
@@ -124,8 +124,9 @@ class _IPhone143State extends State<IPhone143> {
                       decoration:
                           const InputDecoration(hintText: 'ornek@gmail.com'),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty)
+                        if (v == null || v.trim().isEmpty) {
                           return 'Zorunlu alan';
+                        }
                         if (!v.contains('@')) return 'Geçerli bir email girin';
                         return null;
                       },

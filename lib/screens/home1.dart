@@ -90,7 +90,7 @@ class _Home1State extends State<Home1> {
 
   @override
   Widget build(BuildContext context) {
-    final titleStyle = const TextStyle(
+    const titleStyle = TextStyle(
       fontSize: fs22,
       fontFamily: 'Roboto Flex',
       fontWeight: FontWeight.w700,
@@ -131,7 +131,7 @@ class _Home1State extends State<Home1> {
       children: [
         _Header(userId: _userId),
         const SizedBox(height: 16),
-        _SectionTitle(text: 'Yaklaşan Randevu'),
+        const _SectionTitle(text: 'Yaklaşan Randevu'),
         const SizedBox(height: 8),
         _nextAppointment == null
             ? const _EmptySmall(
@@ -141,7 +141,7 @@ class _Home1State extends State<Home1> {
               )
             : _NextAppointmentCard(appt: _nextAppointment!),
         const SizedBox(height: 20),
-        _SectionTitle(text: 'Hızlı İşlemler'),
+        const _SectionTitle(text: 'Hızlı İşlemler'),
         const SizedBox(height: 8),
         _QuickActions(
           onTapMakeAppointment: () {
@@ -156,12 +156,9 @@ class _Home1State extends State<Home1> {
           },
         ),
         const SizedBox(height: 20),
-        _SectionTitle(text: 'Son Randevular'),
+        const _SectionTitle(text: 'Son Randevular'),
         const SizedBox(height: 8),
-        ..._appointments
-            .take(3)
-            .map((a) => _SmallAppointmentTile(appt: a))
-            .toList(),
+        ..._appointments.take(3).map((a) => _SmallAppointmentTile(appt: a)),
         if (_appointments.isEmpty)
           const _EmptySmall(
             message: 'Kayıtlı randevun yok',
@@ -631,7 +628,6 @@ class _EmptySmall extends StatelessWidget {
   final String routeName;
 
   const _EmptySmall({
-    super.key,
     required this.message,
     required this.ctaText,
     required this.routeName,

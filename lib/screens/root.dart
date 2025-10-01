@@ -16,13 +16,13 @@ class RootPage extends StatelessWidget {
 
     // Basit responsive: geniş ekranda içerik genişliğini sınırla
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth >= 600;
             final horizontalPadding = isWide ? 32.0 : 20.0;
-            final maxContentWidth = 640.0;
+            const maxContentWidth = 640.0;
 
             return Center(
               child: ConstrainedBox(
@@ -44,7 +44,7 @@ class RootPage extends StatelessWidget {
                         'Reviz’e Devam Edelim',
                         style: texts.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: colors.onBackground,
+                          color: colors.onSurface,
                         ),
                         textAlign: TextAlign.start,
                       ),
@@ -98,7 +98,8 @@ class RootPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(999),
                                 child: LinearProgressIndicator(
                                   value: 2 / 5, // Welcome(1) → Root(2) → ...
-                                  backgroundColor: colors.surfaceVariant,
+                                  backgroundColor:
+                                      colors.surfaceContainerHighest,
                                   color: colors.primary,
                                   minHeight: 8,
                                 ),

@@ -127,10 +127,10 @@ class _AuthGateState extends State<AuthGate> {
       return const HomePage();
     }
     // Oturum yoksa: Landing (senin ekranın) → oradan Login/Register'a geç
-    return IPhone141(
+    return const IPhone141(
       // IPhone141 içinde “Giriş Yap” butonunda: Navigator.pushNamed(context, 'login');
       // “Kayıt Ol” butonunda: Navigator.pushNamed(context, 'register');
-      key: const ValueKey('landing'),
+      key: ValueKey('landing'),
     );
   }
 }

@@ -74,8 +74,8 @@ class _RandevuAlPageState extends State<RandevuAlPage> {
   RandevuAdimi _step = RandevuAdimi.aracVeHizmet;
 
   // Araç & Hizmet
-  String? _selectedPlate = '34 BAK 81';
-  String? _selectedVehicleModel = 'CBR-650';
+  final String? _selectedPlate = '34 BAK 81';
+  final String? _selectedVehicleModel = 'CBR-650';
   String _serviceType = 'Onarım'; // default
   // Konum & servis önerileri
   String? _selectedServiceId; // "duha-motobike" gibi.
@@ -208,9 +208,9 @@ class _RandevuAlPageState extends State<RandevuAlPage> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF3F5FD),
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: fs22,
               fontFamily: 'Roboto Flex',
               fontWeight: FontWeight.w700,

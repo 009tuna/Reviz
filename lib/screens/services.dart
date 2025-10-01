@@ -467,14 +467,14 @@ class ServiceDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              _InfoTile(
+              const _InfoTile(
                   label: 'Çalışma Saatleri',
                   value: 'Hafta içi 09:00 - 19:00, Cumartesi 10:00 - 17:00'),
-              _InfoTile(
+              const _InfoTile(
                   label: 'Hizmetler',
                   value: 'Periyodik bakım, Onarım, Ekspertiz'),
               _InfoTile(label: 'Adres', value: item.cityDistrict),
-              _InfoTile(label: 'İletişim', value: '+90 5xx xxx xx xx'),
+              const _InfoTile(label: 'İletişim', value: '+90 5xx xxx xx xx'),
 
               const SizedBox(height: 20),
               // CTA

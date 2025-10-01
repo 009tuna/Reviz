@@ -15,7 +15,7 @@ class Root1Page extends StatelessWidget {
     final texts = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -36,7 +36,7 @@ class Root1Page extends StatelessWidget {
                         'Son Bir Adım',
                         style: texts.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: colors.onBackground,
+                          color: colors.onSurface,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -81,7 +81,8 @@ class Root1Page extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(999),
                                 child: LinearProgressIndicator(
                                   value: 5 / 5,
-                                  backgroundColor: colors.surfaceVariant,
+                                  backgroundColor:
+                                      colors.surfaceContainerHighest,
                                   color: colors.primary,
                                   minHeight: 8,
                                 ),

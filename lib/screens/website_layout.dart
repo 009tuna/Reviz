@@ -15,7 +15,7 @@ class WebsiteLayoutPage extends StatelessWidget {
     final texts = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -36,7 +36,7 @@ class WebsiteLayoutPage extends StatelessWidget {
                         'Website Düzeni',
                         style: texts.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: colors.onBackground,
+                          color: colors.onSurface,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -77,7 +77,7 @@ class WebsiteLayoutPage extends StatelessWidget {
                                     children: [
                                       Row(
                                         children: [
-                                          Expanded(
+                                          const Expanded(
                                             child: _SectionPlaceholder(
                                               title: 'Sol Bölüm',
                                               icon: Icons.view_sidebar_rounded,
@@ -85,7 +85,7 @@ class WebsiteLayoutPage extends StatelessWidget {
                                           ),
                                           if (twoCol) const SizedBox(width: 12),
                                           if (twoCol)
-                                            Expanded(
+                                            const Expanded(
                                               child: _SectionPlaceholder(
                                                 title: 'Sağ Bölüm',
                                                 icon: Icons.view_week_rounded,
@@ -95,7 +95,7 @@ class WebsiteLayoutPage extends StatelessWidget {
                                       ),
                                       if (!twoCol) const SizedBox(height: 12),
                                       if (!twoCol)
-                                        _SectionPlaceholder(
+                                        const _SectionPlaceholder(
                                           title: 'Alt Bölüm',
                                           icon: Icons.view_day_rounded,
                                         ),
@@ -121,7 +121,8 @@ class WebsiteLayoutPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(999),
                                 child: LinearProgressIndicator(
                                   value: 4 / 5,
-                                  backgroundColor: colors.surfaceVariant,
+                                  backgroundColor:
+                                      colors.surfaceContainerHighest,
                                   color: colors.primary,
                                   minHeight: 8,
                                 ),
