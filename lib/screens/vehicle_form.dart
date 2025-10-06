@@ -173,6 +173,10 @@ class _VehicleFormPageState extends State<VehicleFormPage> {
             FilledButton(
               onPressed: () async {
                 if (!_formKey.currentState!.validate()) return;
+
+                // context'i await'ten sonra kullanmamak için Navigator'ı önden al
+                final navigator = Navigator.of(context);
+
                 final v = await repo.addVehicle(
                   plate: _plate.text,
                   brand: _brand!,
@@ -181,8 +185,9 @@ class _VehicleFormPageState extends State<VehicleFormPage> {
                   purchaseDate: _purchaseDate,
                   km: _km.text.isEmpty ? null : int.parse(_km.text),
                 );
-                if (!mounted) return;
-                Navigator.of(context).pop<Vehicle>(v);
+
+                // Artık context değil, önceden alınmış navigator'ı kullanıyoruz
+                navigator.pop<Vehicle>(v);
               },
               child: const Text('Aracı Kaydet'),
             ),

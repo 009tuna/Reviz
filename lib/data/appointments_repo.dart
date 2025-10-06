@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Randevu durumları
 enum AppointmentStatus { pending, confirmed, completed, cancelled }
 
-/// Tek model
+/// Tek model (liste/okuma için)
 class Appointment {
   final String id;
   final String plate;
@@ -105,12 +105,64 @@ class Appointment {
   }
 }
 
+/// INSERT için DTO
+class AppointmentCreate {
+  final String userId;
+  final String serviceId;
+  final String serviceName; // UI'da gösterim için saklıyoruz
+  final DateTime startsAt;
+
+  final String plate;
+  final String vehicleModel;
+
+  final String? note;
+  final String? cityDistrict;
+  final double? distanceKm;
+  final bool hasTow;
+  final List<String> brandTags;
+  final List<String> imageUrls;
+
+  const AppointmentCreate({
+    required this.userId,
+    required this.serviceId,
+    required this.serviceName,
+    required this.startsAt,
+    required this.plate,
+    required this.vehicleModel,
+    this.note,
+    this.cityDistrict,
+    this.distanceKm,
+    this.hasTow = false,
+    this.brandTags = const [],
+    this.imageUrls = const [],
+  });
+
+  Map<String, dynamic> toRow() => {
+        'user_id': userId,
+        'service_id': serviceId,
+        'service_name': serviceName,
+        'date_time': startsAt.toIso8601String(),
+        'plate': plate,
+        'vehicle_model': vehicleModel,
+        'note': note,
+        'city_district': cityDistrict,
+        'distance_km': distanceKm,
+        'has_tow': hasTow,
+        'brand_tags': brandTags,
+        'image_urls': imageUrls,
+        'status': 'pending',
+      };
+}
+
 /// Arayüz
 abstract class AppointmentRepo {
   Stream<List<Appointment>> streamAppointments(String userId);
   Future<List<Appointment>> fetchAppointments(String userId);
   Future<void> cancelAppointment(String appointmentId);
   Future<void> rescheduleAppointment(String appointmentId, DateTime newTime);
+
+  /// INSERT – yeni randevu ID döner
+  Future<String> createAppointment(AppointmentCreate input);
 }
 
 /// Supabase implementasyonu
@@ -130,14 +182,12 @@ class SupabaseAppointmentRepo implements AppointmentRepo {
 
   @override
   Future<List<Appointment>> fetchAppointments(String userId) async {
-    // BURADA GENERIC YOK: sadece .select()
     final rows = await supabase
         .from(_table)
         .select()
         .eq('user_id', userId)
         .order('date_time', ascending: true);
 
-    // rows tip olarak dynamic list olabilir; güvenli cast + map:
     final list = (rows as List)
         .map((e) => Appointment.fromRow(e as Map<String, dynamic>))
         .toList();
@@ -158,6 +208,15 @@ class SupabaseAppointmentRepo implements AppointmentRepo {
       'date_time': newTime.toIso8601String(),
       'status': 'confirmed',
     }).eq('id', appointmentId);
+  }
+
+  /// INSERT + dönen id
+  @override
+  Future<String> createAppointment(AppointmentCreate input) async {
+    final row =
+        await supabase.from(_table).insert(input.toRow()).select('id').single();
+
+    return row['id'].toString();
   }
 }
 
@@ -250,5 +309,27 @@ class MockAppointmentRepo implements AppointmentRepo {
             : e)
         .toList();
     _controller.add(_data);
+  }
+
+  /// Mock insert – id döndür
+  @override
+  Future<String> createAppointment(AppointmentCreate input) async {
+    final id = DateTime.now().millisecondsSinceEpoch.toString();
+    final a = Appointment(
+      id: id,
+      plate: input.plate,
+      vehicleModel: input.vehicleModel,
+      serviceName: input.serviceName,
+      dateTime: input.startsAt,
+      cityDistrict: input.cityDistrict ?? 'Mock/İstanbul',
+      distanceKm: input.distanceKm ?? 1.0,
+      status: AppointmentStatus.pending,
+      hasTow: input.hasTow,
+      note: input.note,
+      brandTags: input.brandTags,
+    );
+    _data = [..._data, a];
+    _controller.add(_data);
+    return id;
   }
 }

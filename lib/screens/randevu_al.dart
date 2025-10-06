@@ -5,6 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:reviz_develop/theme/tokens.dart';
 import 'package:reviz_develop/widgets/icons.dart' as reviz_icons;
 import 'package:reviz_develop/widgets/job_date_and_time.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:reviz_develop/data/appointments_repo.dart';
+
 // Eğer Supabase kullanıyorsan (opsiyonel – yoksa yoruma al)
 // import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,50 +18,6 @@ enum RandevuAdimi {
   sevkHizmeti
 }
 
-class AppointmentRequest {
-  String? plate;
-  String? vehicleModel;
-  String serviceType; // "Onarım" | "Bakım" | "Ekspertiz"
-  String? address;
-  String? note;
-  DateTime? preferredDate; // JobDateAndTime veya seçilen tarih
-  String? timeSlot; // "Sabah 9:00-12:00" vb.
-  String? serviceId; // seçilen servis
-  String? towType; // Sevk seçimi
-  double? towPrice;
-  List<String> imageUrls;
-
-  AppointmentRequest({
-    this.plate,
-    this.vehicleModel,
-    required this.serviceType,
-    this.address,
-    this.note,
-    this.preferredDate,
-    this.timeSlot,
-    this.serviceId,
-    this.towType,
-    this.towPrice,
-    List<String>? imageUrls,
-  }) : imageUrls = imageUrls ?? [];
-}
-
-// Basit backend stub (Supabase/REST bağlamak için hazır)
-class AppointmentRepository {
-  // final SupabaseClient supabase = Supabase.instance.client;
-
-  Future<String> uploadFileToStorage(File file) async {
-    // TODO: Supabase Storage’a yükleme
-    await Future.delayed(const Duration(milliseconds: 300));
-    return 'https://example.com/${file.path.split('/').last}';
-  }
-
-  Future<void> createAppointment(AppointmentRequest req) async {
-    // TODO: Supabase RPC/REST’e gönder
-    await Future.delayed(const Duration(milliseconds: 400));
-  }
-}
-
 class RandevuAlPage extends StatefulWidget {
   const RandevuAlPage({super.key, this.onCreatedNavigateTo = 'appointments'});
   final String onCreatedNavigateTo; // <— varsa route’ta kullanabilirsin
@@ -67,15 +26,16 @@ class RandevuAlPage extends StatefulWidget {
 }
 
 class _RandevuAlPageState extends State<RandevuAlPage> {
-  final _repo = AppointmentRepository();
+  final AppointmentRepo _repo =
+      SupabaseAppointmentRepo(Supabase.instance.client);
   final _picker = ImagePicker();
 
   // State
   RandevuAdimi _step = RandevuAdimi.aracVeHizmet;
 
   // Araç & Hizmet
-  final String? _selectedPlate = '34 BAK 81';
-  final String? _selectedVehicleModel = 'CBR-650';
+  final String _selectedPlate = '34 BAK 81';
+  final String _selectedVehicleModel = 'CBR-650';
   String _serviceType = 'Onarım'; // default
   // Konum & servis önerileri
   String? _selectedServiceId; // "duha-motobike" gibi.
@@ -144,58 +104,108 @@ class _RandevuAlPageState extends State<RandevuAlPage> {
     }
   }
 
+  ({int hour, int minute}) _slotStart(String slot) {
+    // Alt yazılarınızla birebir eşleşecek şekilde parse
+    switch (slot) {
+      case 'Sabah 9:00 - 12:00':
+        return (hour: 9, minute: 0);
+      case 'Öğlen 13:00 - 16:00':
+        return (hour: 13, minute: 0);
+      case 'Akşam 16:00 - 19:00':
+        return (hour: 16, minute: 0);
+      default:
+        // bilinmeyen gelirse güvenli varsayılan
+        return (hour: 9, minute: 0);
+    }
+  }
+
   Future<void> _submit() async {
-    // Alan kontrolleri
-    if (_selectedPlate == null ||
-        _serviceType.isEmpty ||
-        _selectedServiceId == null ||
-        _selectedDate == null ||
-        _selectedTimeSlot == null ||
-        _address == null ||
-        (_note == null || _note!.trim().isEmpty)) {
+    // Zorunlu alanlar: servis, tarih, saat, adres, not
+    if (_selectedServiceId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lütfen zorunlu alanları doldurun.')),
+        const SnackBar(content: Text('Lütfen bir servis seçin.')),
+      );
+      return;
+    }
+    if (_selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lütfen bir tarih seçin.')),
+      );
+      return;
+    }
+    if (_selectedTimeSlot == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lütfen bir saat aralığı seçin.')),
+      );
+      return;
+    }
+    if (_address == null || _address!.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lütfen adres seçin.')),
+      );
+      return;
+    }
+    if (_note == null || _note!.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lütfen açıklama (not) girin.')),
       );
       return;
     }
 
     setState(() => _submitting = true);
-    try {
-      // Görselleri yükle
-      final urls = <String>[];
-      for (final f in _pickedImages) {
-        final url = await _repo.uploadFileToStorage(f);
-        urls.add(url);
-      }
 
-      final req = AppointmentRequest(
+    try {
+      // (Opsiyonel) görselleri yükleme – şu an mock upload var
+      final urls = <String>[];
+
+      // Saat aralığından başlangıç saati
+      final hm = _slotStart(_selectedTimeSlot!);
+      final d = _selectedDate!;
+      final startsAt = DateTime(d.year, d.month, d.day, hm.hour, hm.minute);
+
+      // Giriş yapan kullanıcı ID (yoksa 'demo')
+      final userId = Supabase.instance.client.auth.currentUser?.id ?? 'demo';
+
+      // Service adı şu an mock; elinizde gerçek ad yoksa id ile geçici doldurabilirsiniz
+      const serviceName =
+          'Seçilen Servis'; // isterseniz id’yi yazın: _selectedServiceId!
+
+      final enrichedNote = (_towPrice != null &&
+              _towType != null &&
+              _towType!.isNotEmpty)
+          ? '${_note!.trim()} • Sevk: $_towType (${_towPrice!.toStringAsFixed(2)} TL)'
+          : _note!.trim();
+
+      // DTO oluştur
+      final input = AppointmentCreate(
+        userId: userId,
+        serviceId: _selectedServiceId!,
+        serviceName: serviceName,
+        startsAt: startsAt,
         plate: _selectedPlate,
         vehicleModel: _selectedVehicleModel,
-        serviceType: _serviceType,
-        address: _address,
-        note: _note,
-        preferredDate: _selectedDate,
-        timeSlot: _selectedTimeSlot,
-        serviceId: _selectedServiceId,
-        towType: _towType,
-        towPrice: _towPrice,
+        note: enrichedNote,
+        cityDistrict: _address,
+        distanceKm: null, // isterseniz hesaplayıp verin
+        hasTow: _towType != null && _towType!.isNotEmpty,
+        brandTags: const [], // isterseniz doldurun
         imageUrls: urls,
       );
 
-      await _repo.createAppointment(req);
+      // INSERT → id dönüyor
+      final newId = await _repo.createAppointment(input);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Randevu alındı!')),
-        );
-        Navigator.pop(context, true);
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Randevu alındı! (#$newId)')),
+      );
+      // Randevular sayfasına geç
+      Navigator.pushReplacementNamed(context, widget.onCreatedNavigateTo);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hata: $e')),
+      );
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

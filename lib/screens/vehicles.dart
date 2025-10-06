@@ -71,16 +71,24 @@ class _VehiclesPageState extends State<VehiclesPage> {
   }
 
   Future<void> _goAdd() async {
-    final added = await Navigator.of(context).push<Vehicle?>(
+    // await'lerden sonra context kullanmamak için referansları önce al
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
+    // sayfaya git ve sonucu bekle
+    final added = await navigator.push<Vehicle?>(
       MaterialPageRoute(builder: (_) => const VehicleFormPage()),
     );
-    if (added != null && mounted) {
-      // başarıyla eklendiyse listeyi tazele
-      await ctrl.refresh();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${added.plate} kaydedildi')),
-      );
-    }
+
+    if (added == null) return;
+
+    // listeyi tazele
+    await ctrl.refresh();
+
+    // kullanıcıya bilgi ver
+    messenger.showSnackBar(
+      SnackBar(content: Text('${added.plate} kaydedildi')),
+    );
   }
 }
 

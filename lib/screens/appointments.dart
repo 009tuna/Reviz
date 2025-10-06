@@ -182,8 +182,10 @@ class _AppointmentsPageState extends State<AppointmentsPage>
                   item.status == AppointmentStatus.confirmed)
               ? () async {
                   await widget.repo.cancelAppointment(item.id);
+
+                  // await sonrası State.context kullan => mounted ile koru
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(this.context).showSnackBar(
                     const SnackBar(content: Text('Randevu iptal edildi')),
                   );
                 }
@@ -191,16 +193,24 @@ class _AppointmentsPageState extends State<AppointmentsPage>
           onReschedule: (item.status == AppointmentStatus.pending ||
                   item.status == AppointmentStatus.confirmed)
               ? () async {
+                  // State.context'i kullanıyoruz
                   final picked = await showDatePicker(
-                    context: context,
+                    context: this.context,
                     initialDate: item.dateTime,
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
+
+                  // await sonrası tekrar kontrol et
+                  if (!mounted) return;
+
                   if (picked != null) {
                     await widget.repo.rescheduleAppointment(item.id, picked);
+
+                    // tekrar await => tekrar kontrol
                     if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
+
+                    ScaffoldMessenger.of(this.context).showSnackBar(
                       const SnackBar(content: Text('Randevu güncellendi')),
                     );
                   }

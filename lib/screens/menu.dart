@@ -50,9 +50,9 @@ class Menu extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     userName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: fs22,
                       fontFamily: 'Roboto Flex',
                       fontWeight: FontWeight.bold,
@@ -143,8 +143,13 @@ class Menu extends StatelessWidget {
                     title: "Çıkış Yap",
                     iconPath: "assets/log-out@2x.png",
                     onTap: () async {
-                      await Supabase.instance.client.auth.signOut();
-                      Navigator.pushReplacementNamed(context, "/");
+                      final navigator = Navigator.of(context);
+                      try {
+                        await Supabase.instance.client.auth.signOut();
+                      } catch (_) {
+                        // isteğe bağlı: hatayı loglayabilirsin
+                      }
+                      navigator.pushNamedAndRemoveUntil('/', (route) => false);
                     },
                   ),
                 ],

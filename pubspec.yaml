@@ -33,6 +33,7 @@ dependencies:
 
   # Durum / yardımcılar (gerekirse)
   collection: ^1.18.0
+  mime: ^2.0.0
 
 dev_dependencies:
   flutter_test:
